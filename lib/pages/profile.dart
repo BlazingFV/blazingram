@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:fluttershare/models/user.dart';
 import 'package:fluttershare/pages/edit_profile.dart';
+import 'package:fluttershare/pages/followers_screen.dart';
+import 'package:fluttershare/pages/following_screen.dart';
 import 'package:fluttershare/pages/home.dart';
 import 'package:fluttershare/widgets/header.dart';
 import 'package:fluttershare/widgets/post.dart';
@@ -48,14 +50,12 @@ class _ProfileState extends State<Profile> {
   }
 
   getFollowers() async {
-    
-    
     QuerySnapshot snapshot = await followersRef
         .doc(widget.profileId)
         .collection('userFollowers')
         .get();
     setState(() {
-      followerCount = snapshot.docs.length-1;
+      followerCount = snapshot.docs.length - 1;
     });
   }
 
@@ -267,9 +267,27 @@ class _ProfileState extends State<Profile> {
                             mainAxisSize: MainAxisSize.max,
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              buildCountColumn('posts', postCount),
-                              buildCountColumn('followers', followerCount),
-                              buildCountColumn('following', followingCount),
+                              buildCountColumn('Posts', postCount),
+                              GestureDetector(
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => FollowersScreen(profileId:widget.profileId),
+                                  ),
+                                ),
+                                child: buildCountColumn(
+                                    'Followers', followerCount),
+                              ),
+                              GestureDetector(
+                                onTap: () =>Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context)=>FollowingScreen(profileId:widget.profileId),
+                                  ),
+                                ),
+                                child: buildCountColumn(
+                                    'Following', followingCount),
+                              ),
                             ],
                           ),
                           Row(

@@ -3,52 +3,46 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttershare/models/user.dart';
-import 'package:fluttershare/pages/activity_feed.dart';
 import 'package:fluttershare/pages/home.dart';
+import 'package:fluttershare/pages/profile.dart';
+import 'package:fluttershare/widgets/header.dart';
 import 'package:fluttershare/widgets/progress.dart';
 
-class Search extends StatefulWidget {
+class FollowersScreen extends StatefulWidget {
+  final String profileId;
+  FollowersScreen({this.profileId});
   @override
-  _SearchState createState() => _SearchState();
+  _FollowersScreenState createState() => _FollowersScreenState();
 }
 
-class _SearchState extends State<Search>
-    with AutomaticKeepAliveClientMixin<Search> {
-  TextEditingController _controller = TextEditingController();
-  Future<QuerySnapshot> searchResults;
+class _FollowersScreenState extends State<FollowersScreen> {
+  final String currentUserId = currentUser?.id;
+  Future<QuerySnapshot> followingResults;
+  List<String> followersList = [];
+  var following;
 
-  handleSearch(String query) {
-    if (query.trim().isNotEmpty) {
-      final users = usersRef
-          .where('username', isGreaterThanOrEqualTo: query)
-          .get();
-      setState(() {
-        searchResults = users;
-      });
-    }
+  handleGetFollowers() async {
+    QuerySnapshot snapshot = await followersRef
+        .doc(widget.profileId)
+        .collection('userFollowers')
+        .get();
+    setState(() {
+      followersList = snapshot.docs.map((doc) => doc.id).toList();
+    });
   }
 
-  AppBar buildSearchBar() {
-    return AppBar(
-      backgroundColor: Colors.white,
-      title: TextFormField(
-        controller: _controller,
-        decoration: InputDecoration(
-          hintText: 'Search for a user...',
-          filled: true,
-          prefixIcon: Icon(
-            Icons.supervisor_account,
-            size: 28,
-          ),
-          suffixIcon: IconButton(
-              icon: Icon(Icons.clear),
-              onPressed: () {
-                _controller.clear();
-              }),
-        ),
-        onChanged: handleSearch,
-      ),
-    );
+  handleGetUsers(id) {
+    final user = usersRef.where('id', isEqualTo: id).get();
+    setState(() {
+      followingResults = user;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    handleGetUsers(following);
+    handleGetFollowers();
   }
 
   buildNoContent() {
@@ -59,10 +53,10 @@ class _SearchState extends State<Search>
           shrinkWrap: true,
           children: [
             Text(
-              'Find Users',
+              'Nothing here yet...',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.white,
+                color: Colors.black,
                 fontFamily: 'Signatra',
                 fontWeight: FontWeight.w400,
                 fontSize: 60,
@@ -78,22 +72,28 @@ class _SearchState extends State<Search>
     );
   }
 
-  buildSearchResults() {
+  buildfollowersResults() {
     return FutureBuilder(
-        future: searchResults,
+        future: followingResults,
         builder: (context, snapShot) {
           if (!snapShot.hasData) {
             return circularProgress();
           }
+          print(snapShot.data.docs);
+          print(followersList);
           List<UserResult> searchResultss = [];
           snapShot.data.docs.forEach((doc) {
             User user = User.fromDocument(doc);
             final bool isAuthUser = currentUser.id == user.id;
-            if(isAuthUser){
+            final bool isFollowingUser = followersList.contains(user.id);
+            if (isAuthUser) {
+              return;
+            } else if (isFollowingUser) {
+              UserResult searchResult = UserResult(user);
+              searchResultss.add(searchResult);
+            } else {
               return;
             }
-            UserResult searchResult = UserResult(user);
-            searchResultss.add(searchResult);
           });
           return ListView(
             children: searchResultss,
@@ -101,16 +101,12 @@ class _SearchState extends State<Search>
         });
   }
 
-  bool get wantKeepAlive => true;
-
   @override
   Widget build(BuildContext context) {
-    super.build(context);
-    
     return Scaffold(
-      backgroundColor: Colors.lightBlue[200],
-      appBar: buildSearchBar(),
-      body: searchResults == null ? buildNoContent() : buildSearchResults(),
+      appBar: header(context, titleText: 'Followers'),
+      body:
+          followingResults == null ? buildNoContent() : buildfollowersResults(),
     );
   }
 }
@@ -122,7 +118,6 @@ class UserResult extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.lightBlue[200],
       child: Column(
         children: [
           GestureDetector(
@@ -130,29 +125,42 @@ class UserResult extends StatelessWidget {
             child: ListTile(
               leading: CircleAvatar(
                 backgroundColor: Colors.grey,
-                backgroundImage: CachedNetworkImageProvider(user.photoUrl),
+                backgroundImage: user.photoUrl != null
+                    ? CachedNetworkImageProvider(user.photoUrl)
+                    : AssetImage('assets/images/person-icon.png'),
               ),
               title: Text(
-               user.displayName,
+                '${user?.displayName}',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Colors.black,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               subtitle: Text(
-                user.username,
+                '${user?.username}',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Colors.grey,
                 ),
               ),
             ),
           ),
           Divider(
             height: 2.0,
-            color: Colors.white54,
+            color: Colors.grey,
           ),
         ],
       ),
     );
   }
+}
+
+showProfile(BuildContext context, {String profileId}) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => Profile(
+        profileId: profileId,
+      ),
+    ),
+  );
 }

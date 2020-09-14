@@ -39,7 +39,7 @@ class _TextPostState extends State<TextPost> {
       isUploading = true;
     });
 
-    createPostInFirestore(
+   await createPostInFirestore(
       location: locationController.text,
       caption: captionController.text,
     );

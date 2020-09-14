@@ -27,6 +27,12 @@ class _ActivityFeedState extends State<ActivityFeed> {
     });
     return feedItems;
   }
+  @override
+  void initState() { 
+    super.initState();
+    getActivityFeed();
+    
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +81,6 @@ class ActivityFeedItem extends StatelessWidget {
   factory ActivityFeedItem.fromDocument(DocumentSnapshot doc) {
      Map getDocs = doc.data();
     return ActivityFeedItem(
-     
       username: getDocs['username'],
       userId: getDocs['userId'],
       type: getDocs['type'],
