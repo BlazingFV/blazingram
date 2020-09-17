@@ -5,6 +5,8 @@ import 'package:fluttershare/pages/home.dart';
 import 'package:fluttershare/pages/post_screen.dart';
 import 'package:fluttershare/pages/profile.dart';
 import 'package:fluttershare/widgets/header.dart';
+import 'package:fluttershare/widgets/post.dart';
+import 'package:fluttershare/widgets/post_tile.dart';
 import 'package:fluttershare/widgets/progress.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -91,14 +93,15 @@ class ActivityFeedItem extends StatelessWidget {
       mediaUrl: getDocs['mediaUrl'],
     );
   }
+  
 
   showPost(context) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => PostScreen(
-          postId: postId,
-          userId: userId,
+         userId: currentUser?.id,
+         postId: postId,
         ),
       ),
     );
@@ -162,7 +165,7 @@ class ActivityFeedItem extends StatelessWidget {
                     ),
                   ),
                   TextSpan(
-                    text: ' $activityItemText',
+                    text: ' $activityItemText ',
                   ),
                 ],
               ),

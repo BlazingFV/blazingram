@@ -13,6 +13,7 @@ class PostTile extends StatelessWidget {
         builder: (context) => PostScreen(
           postId: post.postId,
           userId: post.ownerId,
+          mediaUrl: post.mediaUrl,
         ),
       ),
     );

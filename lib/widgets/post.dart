@@ -19,7 +19,6 @@ class Post extends StatefulWidget {
   final String location;
   final String caption;
   final String mediaUrl;
-
   final dynamic likes;
 
   Post({
@@ -32,15 +31,16 @@ class Post extends StatefulWidget {
     this.likes,
   });
   factory Post.fromDocument(DocumentSnapshot doc) {
-    Map getDocs = doc.data();
+    var getDocs = doc.data();
     return Post(
-      postId: getDocs['postId'],
-      ownerId: getDocs['ownerId'],
+      postId:doc.data()['postId'],
+      ownerId:getDocs['ownerId'] ,
       username: getDocs['username'],
       location: getDocs['location'],
       caption: getDocs['caption'],
       mediaUrl: getDocs['mediaUrl'],
       likes: getDocs['likes'],
+     
     );
   }
   int getLikeCount(likes) {
